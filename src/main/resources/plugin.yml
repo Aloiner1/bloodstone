@@ -1,0 +1,27 @@
+name: TerminatorEvent
+version: '${project.version}'
+main: boo.bloodstone.TerminatorPlugin
+api-version: '1.21'
+author: Aloiner
+description: Для Ивента
+softdepend: [PlaceholderAPI]
+
+commands:
+  terminator:
+    description: Терминаторы
+    usage: /terminator <add|remove|list> [player]
+    permission: terminator.admin
+    aliases: [term, t]
+  tcompass:
+    description: Выдаёт компас с трекером
+    usage: /tcompass [player]
+    permission: terminator.compass
+    aliases: [tc, compass]
+
+permissions:
+  terminator.admin:
+    description: Управление терминаторами
+    default: op
+  terminator.compass:
+    description: Управление компасами
+    default: op
