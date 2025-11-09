@@ -17,20 +17,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompassManager {
-    
     private final TerminatorPlugin plugin;
     private final NamespacedKey compassKey;
     private BukkitTask updateTask;
-    
+
     public CompassManager(TerminatorPlugin plugin) {
         this.plugin = plugin;
         this.compassKey = new NamespacedKey(plugin, "terminator_compass");
     }
-    
+
     public ItemStack createTrackingCompass() {
         ItemStack compass = new ItemStack(Material.COMPASS);
         CompassMeta meta = (CompassMeta) compass.getItemMeta();
-        
+
         if (meta != null) {
             String nameConfig = plugin.getConfig().getString("compass.name", "&c&lТрекер");
             Component name = LegacyComponentSerializer.legacyAmpersand()
@@ -45,52 +44,52 @@ public class CompassManager {
                     .collect(Collectors.toList());
             meta.lore(lore);
             meta.getPersistentDataContainer().set(compassKey, PersistentDataType.BYTE, (byte) 1);
-            
+
             compass.setItemMeta(meta);
         }
-        
+
         return compass;
     }
-    
+
     public boolean isTrackingCompass(ItemStack item) {
         if (item == null || item.getType() != Material.COMPASS) {
             return false;
         }
-        
+
         CompassMeta meta = (CompassMeta) item.getItemMeta();
         if (meta == null) {
             return false;
         }
-        
+
         return meta.getPersistentDataContainer().has(compassKey, PersistentDataType.BYTE);
     }
-    
+
     public boolean updateCompass(Player player, ItemStack compass) {
         if (!isTrackingCompass(compass)) return false;
-        
+
         Player target = plugin.getTerminatorManager().getNearestTerminator(player);
         CompassMeta meta = (CompassMeta) compass.getItemMeta();
         if (meta == null) return false;
-        
+
         if (target == null) {
             meta.setLodestone(null);
             meta.setLodestoneTracked(false);
             compass.setItemMeta(meta);
             return false;
         }
-        
+
         meta.setLodestone(target.getLocation());
         meta.setLodestoneTracked(false);
         compass.setItemMeta(meta);
         return true;
     }
-    
+
     public void updateAllCompasses() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             updatePlayerCompasses(player);
         }
     }
-    
+
     public void updatePlayerCompasses(Player player) {
         for (ItemStack item : player.getInventory().getContents()) {
             if (isTrackingCompass(item)) {
@@ -98,19 +97,19 @@ public class CompassManager {
             }
         }
     }
-    
+
     public void startUpdateTask() {
         int interval = plugin.getConfig().getInt("compass.update-interval", 40);
         updateTask = Bukkit.getScheduler().runTaskTimer(plugin, this::updateAllCompasses, 0L, interval);
     }
-    
+
     public void stopUpdateTask() {
         if (updateTask != null) {
             updateTask.cancel();
             updateTask = null;
         }
     }
-    
+
     public void giveCompass(Player player) {
         ItemStack compass = createTrackingCompass();
         player.getInventory().addItem(compass);

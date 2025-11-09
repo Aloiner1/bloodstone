@@ -8,35 +8,34 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TerminatorPlaceholder extends PlaceholderExpansion {
-    
     private final TerminatorPlugin plugin;
     private final TerminatorManager terminatorManager;
-    
+
     public TerminatorPlaceholder(TerminatorPlugin plugin) {
         this.plugin = plugin;
         this.terminatorManager = plugin.getTerminatorManager();
     }
-    
+
     @Override
     public @NotNull String getIdentifier() {
         return "terminator";
     }
-    
+
     @Override
     public @NotNull String getAuthor() {
         return "Aloiner";
     }
-    
+
     @Override
     public @NotNull String getVersion() {
         return "1.0.0";
     }
-    
+
     @Override
     public boolean persist() {
         return true;
     }
-    
+
     @Override
     public @Nullable String onPlaceholderRequest(Player p, @NotNull String params) {
         switch (params.toLowerCase()) {

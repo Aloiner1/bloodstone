@@ -17,35 +17,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TCompassCommand implements CommandExecutor, TabCompleter {
-    
     private final CompassManager compassManager;
-    
+
     public TCompassCommand(TerminatorPlugin plugin) {
         this.compassManager = plugin.getCompassManager();
     }
-    
+
     @Override
-    public boolean onCommand(@NotNull CommandSender s, @NotNull Command c,
-                            @NotNull String l, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender s, @NotNull Command c, @NotNull String l, @NotNull String[] args) {
         if (!s.hasPermission("terminator.compass")) {
             s.sendMessage(Component.text("§cУ вас нет прав для использования этой команд"));
             return true;
         }
-        
+
         Player t = args.length == 0 ? (s instanceof Player ? (Player) s : null) : Bukkit.getPlayer(args[0]);
         if (t == null) {
             s.sendMessage(Component.text("§cИгрок не найден"));
             return true;
         }
-        
+
         compassManager.giveCompass(t);
         if (!s.equals(t)) s.sendMessage(Component.text("§aКомпас выдан игроку §e" + t.getName()));
         return true;
     }
-    
+
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command c,
-                                                 @NotNull String a, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command c, @NotNull String a, @NotNull String[] args) {
         if (!s.hasPermission("terminator.compass") || args.length != 1) return new ArrayList<>();
         return Bukkit.getOnlinePlayers().stream()
                 .map(Player::getName)
