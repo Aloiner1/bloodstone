@@ -2,7 +2,7 @@ package boo.bloodstone.commands;
 
 import boo.bloodstone.TerminatorPlugin;
 import boo.bloodstone.managers.CompassManager;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,35 +18,39 @@ import java.util.stream.Collectors;
 
 public class TCompassCommand implements CommandExecutor, TabCompleter {
     private final CompassManager compassManager;
+    private final MiniMessage miniMessage;
 
     public TCompassCommand(TerminatorPlugin plugin) {
         this.compassManager = plugin.getCompassManager();
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender s, @NotNull Command c, @NotNull String l, @NotNull String[] args) {
-        if (!s.hasPermission("terminator.compass")) {
-            s.sendMessage(Component.text("§cУ вас нет прав для использования этой команд"));
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("terminator.compass")) {
+            sender.sendMessage(miniMessage.deserialize("<red>У вас нет прав для использования этой команды</red>"));
             return true;
         }
 
-        Player t = args.length == 0 ? (s instanceof Player ? (Player) s : null) : Bukkit.getPlayer(args[0]);
-        if (t == null) {
-            s.sendMessage(Component.text("§cИгрок не найден"));
+        Player target = args.length == 0 ? (sender instanceof Player ? (Player) sender : null) : Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            sender.sendMessage(miniMessage.deserialize("<red>Игрок не найден</red>"));
             return true;
         }
 
-        compassManager.giveCompass(t);
-        if (!s.equals(t)) s.sendMessage(Component.text("§aКомпас выдан игроку §e" + t.getName()));
+        compassManager.giveCompass(target);
+        if (!sender.equals(target)) {
+            sender.sendMessage(miniMessage.deserialize("<green>Компас выдан игроку <yellow>" + target.getName() + "</yellow></green>"));
+        }
         return true;
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command c, @NotNull String a, @NotNull String[] args) {
-        if (!s.hasPermission("terminator.compass") || args.length != 1) return new ArrayList<>();
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (!sender.hasPermission("terminator.compass") || args.length != 1) return new ArrayList<>();
         return Bukkit.getOnlinePlayers().stream()
                 .map(Player::getName)
-                .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase()))
+                .filter(playerName -> playerName.toLowerCase().startsWith(args[0].toLowerCase()))
                 .collect(Collectors.toList());
     }
 }

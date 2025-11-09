@@ -2,8 +2,7 @@ package boo.bloodstone.managers;
 
 import boo.bloodstone.TerminatorPlugin;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,11 +18,13 @@ import java.util.stream.Collectors;
 public class CompassManager {
     private final TerminatorPlugin plugin;
     private final NamespacedKey compassKey;
+    private final MiniMessage miniMessage;
     private BukkitTask updateTask;
 
     public CompassManager(TerminatorPlugin plugin) {
         this.plugin = plugin;
         this.compassKey = new NamespacedKey(plugin, "terminator_compass");
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     public ItemStack createTrackingCompass() {
@@ -31,16 +32,13 @@ public class CompassManager {
         CompassMeta meta = (CompassMeta) compass.getItemMeta();
 
         if (meta != null) {
-            String nameConfig = plugin.getConfig().getString("compass.name", "&c&lТрекер");
-            Component name = LegacyComponentSerializer.legacyAmpersand()
-                    .deserialize(nameConfig)
-                    .decoration(TextDecoration.ITALIC, false);
+            String nameConfig = plugin.getConfig().getString("compass.name", "<red><bold>Трекер</bold></red>");
+            Component name = miniMessage.deserialize(nameConfig);
             meta.displayName(name);
+            
             List<String> loreConfig = plugin.getConfig().getStringList("compass.lore");
             List<Component> lore = loreConfig.stream()
-                    .map(line -> LegacyComponentSerializer.legacyAmpersand()
-                            .deserialize(line)
-                            .decoration(TextDecoration.ITALIC, false))
+                    .map(miniMessage::deserialize)
                     .collect(Collectors.toList());
             meta.lore(lore);
             meta.getPersistentDataContainer().set(compassKey, PersistentDataType.BYTE, (byte) 1);
@@ -113,6 +111,6 @@ public class CompassManager {
     public void giveCompass(Player player) {
         ItemStack compass = createTrackingCompass();
         player.getInventory().addItem(compass);
-        player.sendMessage(Component.text("§aВы получили компас-трекер"));
+        player.sendMessage(miniMessage.deserialize("<green>Вы получили компас-трекер</green>"));
     }
 }

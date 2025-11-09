@@ -2,9 +2,11 @@ package boo.bloodstone.listeners;
 
 import boo.bloodstone.TerminatorPlugin;
 import boo.bloodstone.managers.TerminatorManager;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,30 +23,37 @@ public class PlayerDeathListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        Player victim = e.getEntity();
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player victim = event.getEntity();
         if (!terminatorManager.isTerminator(victim.getUniqueId())) return;
 
         terminatorManager.removeTerminator(victim.getUniqueId());
         Player killer = victim.getKiller();
-        String name = killer != null ? killer.getName() : "Неизвестный";
-        Bukkit.broadcast(Component.text("§6§l" + name + " §cубил терминатора §c§l" + victim.getName()));
+        String killerName = killer != null ? killer.getName() : "Неизвестный";
+        
+        MiniMessage miniMessage = MiniMessage.miniMessage();
+        Component message = miniMessage.deserialize(
+            "<gold><bold>" + killerName + "</bold></gold> <red>убил терминатора</red> <red><bold>" + victim.getName() + "</bold></red>"
+        );
+        Bukkit.broadcast(message);
 
-        playSound("sounds.terminator-killed", "ENTITY_ENDER_DRAGON_GROWL");
+        playSound("sounds.terminator-killed", "entity.ender_dragon.growl");
         if (!terminatorManager.hasTerminators()) handleAllTerminatorsKilled();
     }
 
     private void handleAllTerminatorsKilled() {
-        Bukkit.broadcast(Component.text("§a§lВсе терминаторы были убиты"));
-        playSound("sounds.all-killed", "UI_TOAST_CHALLENGE_COMPLETE");
+        MiniMessage miniMessage = MiniMessage.miniMessage();
+        Component message = miniMessage.deserialize("<green><bold>Все терминаторы были убиты</bold></green>");
+        Bukkit.broadcast(message);
+        playSound("sounds.all-killed", "ui.toast.challenge_complete");
     }
 
-    private void playSound(String path, String def) {
+    private void playSound(String configPath, String defaultSound) {
         if (!plugin.getConfig().getBoolean("sounds.enabled", true)) return;
         try {
-            @SuppressWarnings("deprecation")
-            Sound s = Sound.valueOf(plugin.getConfig().getString(path, def).toUpperCase());
-            Bukkit.getOnlinePlayers().forEach(p -> p.playSound(p.getLocation(), s, 1.0f, 1.0f));
+            String soundKey = plugin.getConfig().getString(configPath, defaultSound).toLowerCase();
+            Sound sound = Sound.sound(Key.key(soundKey), Sound.Source.MASTER, 100f, 1f);
+            Bukkit.getServer().playSound(sound);
         } catch (Exception ignored) {}
     }
 }

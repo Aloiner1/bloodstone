@@ -10,12 +10,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TerminatorManager {
-    private final TerminatorPlugin plugin;
     private final Set<UUID> terminators;
     private final NamespacedKey terminatorKey;
 
     public TerminatorManager(TerminatorPlugin plugin) {
-        this.plugin = plugin;
         this.terminators = ConcurrentHashMap.newKeySet();
         this.terminatorKey = new NamespacedKey(plugin, "is_terminator");
     }
@@ -76,20 +74,20 @@ public class TerminatorManager {
 
     public Player getNearestTerminator(Player player) {
         List<Player> online = getOnlineTerminators();
-        online.removeIf(t -> t.getUniqueId().equals(player.getUniqueId()));
+        online.removeIf(terminator -> terminator.getUniqueId().equals(player.getUniqueId()));
 
         if (online.isEmpty()) return null;
 
         Player nearest = null;
-        double minDist = Double.MAX_VALUE;
+        double minDistance = Double.MAX_VALUE;
 
-        for (Player t : online) {
-            if (!t.getWorld().equals(player.getWorld())) continue;
+        for (Player terminator : online) {
+            if (!terminator.getWorld().equals(player.getWorld())) continue;
 
-            double dist = t.getLocation().distance(player.getLocation());
-            if (dist < minDist) {
-                minDist = dist;
-                nearest = t;
+            double distance = terminator.getLocation().distance(player.getLocation());
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = terminator;
             }
         }
 
@@ -116,9 +114,9 @@ public class TerminatorManager {
 
     public String getTerminatorNames() {
         List<String> names = new ArrayList<>();
-        for (UUID id : terminators) {
-            Player p = Bukkit.getPlayer(id);
-            names.add(p != null ? p.getName() : Bukkit.getOfflinePlayer(id).getName());
+        for (UUID playerId : terminators) {
+            Player player = Bukkit.getPlayer(playerId);
+            names.add(player != null ? player.getName() : Bukkit.getOfflinePlayer(playerId).getName());
         }
         return String.join(", ", names);
     }

@@ -8,11 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TerminatorPlaceholder extends PlaceholderExpansion {
-    private final TerminatorPlugin plugin;
     private final TerminatorManager terminatorManager;
 
     public TerminatorPlaceholder(TerminatorPlugin plugin) {
-        this.plugin = plugin;
         this.terminatorManager = plugin.getTerminatorManager();
     }
 
@@ -37,19 +35,19 @@ public class TerminatorPlaceholder extends PlaceholderExpansion {
     }
 
     @Override
-    public @Nullable String onPlaceholderRequest(Player p, @NotNull String params) {
+    public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         switch (params.toLowerCase()) {
             case "count": return String.valueOf(terminatorManager.getTerminatorCount());
             case "list": return terminatorManager.hasTerminators() ? terminatorManager.getTerminatorNames() : "Нет терминаторов";
-            case "istarget": return p == null ? "N/A" : terminatorManager.isTerminator(p.getUniqueId()) ? "Да" : "Нет";
+            case "istarget": return player == null ? "N/A" : terminatorManager.isTerminator(player.getUniqueId()) ? "Да" : "Нет";
             case "nearest":
-                if (p == null) return "N/A";
-                Player n = terminatorManager.getNearestTerminator(p);
-                return n != null ? n.getName() : "Нет";
+                if (player == null) return "N/A";
+                Player nearest = terminatorManager.getNearestTerminator(player);
+                return nearest != null ? nearest.getName() : "Нет";
             case "nearest_distance":
-                if (p == null) return "N/A";
-                Player nt = terminatorManager.getNearestTerminator(p);
-                return nt == null ? "∞" : String.valueOf((int) p.getLocation().distance(nt.getLocation()));
+                if (player == null) return "N/A";
+                Player nearestTerminator = terminatorManager.getNearestTerminator(player);
+                return nearestTerminator == null ? "∞" : String.valueOf((int) player.getLocation().distance(nearestTerminator.getLocation()));
             case "online_count": return String.valueOf(terminatorManager.getOnlineTerminators().size());
             default: return null;
         }
