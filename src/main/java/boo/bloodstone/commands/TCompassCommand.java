@@ -2,7 +2,8 @@ package boo.bloodstone.commands;
 
 import boo.bloodstone.TerminatorPlugin;
 import boo.bloodstone.managers.CompassManager;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,29 +19,27 @@ import java.util.stream.Collectors;
 
 public class TCompassCommand implements CommandExecutor, TabCompleter {
     private final CompassManager compassManager;
-    private final MiniMessage miniMessage;
 
     public TCompassCommand(TerminatorPlugin plugin) {
         this.compassManager = plugin.getCompassManager();
-        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("terminator.compass")) {
-            sender.sendMessage(miniMessage.deserialize("<red>У вас нет прав для использования этой команды</red>"));
+            sender.sendMessage(Component.text("У вас нет прав для использования этой команды").color(NamedTextColor.RED));
             return true;
         }
 
         Player target = args.length == 0 ? (sender instanceof Player ? (Player) sender : null) : Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(miniMessage.deserialize("<red>Игрок не найден</red>"));
+            sender.sendMessage(Component.text("Игрок не найден").color(NamedTextColor.RED));
             return true;
         }
 
         compassManager.giveCompass(target);
         if (!sender.equals(target)) {
-            sender.sendMessage(miniMessage.deserialize("<green>Компас выдан игроку <yellow>" + target.getName() + "</yellow></green>"));
+            sender.sendMessage(Component.text("Компас выдан игроку ").color(NamedTextColor.GREEN).append(Component.text(target.getName()).color(NamedTextColor.YELLOW)));
         }
         return true;
     }

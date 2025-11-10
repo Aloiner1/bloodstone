@@ -2,7 +2,9 @@ package boo.bloodstone.commands;
 
 import boo.bloodstone.TerminatorPlugin;
 import boo.bloodstone.managers.TerminatorManager;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,17 +21,15 @@ import java.util.stream.Collectors;
 
 public class TerminatorCommand implements CommandExecutor, TabCompleter {
     private final TerminatorManager terminatorManager;
-    private final MiniMessage miniMessage;
 
     public TerminatorCommand(TerminatorPlugin plugin) {
         this.terminatorManager = plugin.getTerminatorManager();
-        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("terminator.admin")) {
-            sender.sendMessage(miniMessage.deserialize("<red>У вас нет прав для использования этой команды</red>"));
+            sender.sendMessage(Component.text("У вас нет прав для использования этой команды").color(NamedTextColor.RED));
             return true;
         }
 
@@ -59,63 +59,63 @@ public class TerminatorCommand implements CommandExecutor, TabCompleter {
 
     private void handleAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(miniMessage.deserialize("<red>Использование: /terminator add <игрок></red>"));
+            sender.sendMessage(Component.text("Использование: /terminator add <игрок>").color(NamedTextColor.RED));
             return;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(miniMessage.deserialize("<red>Игрок не найден</red>"));
+            sender.sendMessage(Component.text("Игрок не найден").color(NamedTextColor.RED));
             return;
         }
 
         if (terminatorManager.addTerminator(target.getUniqueId())) {
-            sender.sendMessage(miniMessage.deserialize("<green>Игрок <yellow>" + target.getName() + "</yellow> добавлен в терминаторы</green>"));
-            target.sendMessage(miniMessage.deserialize("<red><bold>Вы были назначены терминатором</bold></red>"));
+            sender.sendMessage(Component.text("Игрок ").color(NamedTextColor.GREEN).append(Component.text(target.getName()).color(NamedTextColor.YELLOW)).append(Component.text(" добавлен в терминаторы").color(NamedTextColor.GREEN)));
+            target.sendMessage(Component.text("Вы были назначены терминатором").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
         } else {
-            sender.sendMessage(miniMessage.deserialize("<yellow>Игрок уже является терминатором</yellow>"));
+            sender.sendMessage(Component.text("Игрок уже является терминатором").color(NamedTextColor.YELLOW));
         }
     }
 
     private void handleRemove(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(miniMessage.deserialize("<red>Использование: /terminator remove <игрок></red>"));
+            sender.sendMessage(Component.text("Использование: /terminator remove <игрок>").color(NamedTextColor.RED));
             return;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(miniMessage.deserialize("<red>Игрок не найден</red>"));
+            sender.sendMessage(Component.text("Игрок не найден").color(NamedTextColor.RED));
             return;
         }
 
         if (terminatorManager.removeTerminator(target.getUniqueId())) {
-            sender.sendMessage(miniMessage.deserialize("<green>Игрок <yellow>" + target.getName() + "</yellow> удалён из терминаторов</green>"));
-            target.sendMessage(miniMessage.deserialize("<green>Вы больше не терминатор</green>"));
+            sender.sendMessage(Component.text("Игрок ").color(NamedTextColor.GREEN).append(Component.text(target.getName()).color(NamedTextColor.YELLOW)).append(Component.text(" удалён из терминаторов").color(NamedTextColor.GREEN)));
+            target.sendMessage(Component.text("Вы больше не терминатор").color(NamedTextColor.GREEN));
         } else {
-            sender.sendMessage(miniMessage.deserialize("<red>Игрок не является терминатором</red>"));
+            sender.sendMessage(Component.text("Игрок не является терминатором").color(NamedTextColor.RED));
         }
     }
 
     private void handleList(CommandSender sender) {
         if (terminatorManager.hasTerminators()) {
-            sender.sendMessage(miniMessage.deserialize("<gold>Список терминаторов: <yellow>" + terminatorManager.getTerminatorNames() + "</yellow></gold>"));
+            sender.sendMessage(Component.text("Список терминаторов: ").color(NamedTextColor.GOLD).append(Component.text(terminatorManager.getTerminatorNames()).color(NamedTextColor.YELLOW)));
         } else {
-            sender.sendMessage(miniMessage.deserialize("<red>Нет активных терминаторов</red>"));
+            sender.sendMessage(Component.text("Нет активных терминаторов").color(NamedTextColor.RED));
         }
     }
 
     private void handleClear(CommandSender sender) {
         terminatorManager.clearTerminators();
-        sender.sendMessage(miniMessage.deserialize("<green>Все терминаторы были очищены</green>"));
+        sender.sendMessage(Component.text("Все терминаторы были очищены").color(NamedTextColor.GREEN));
     }
 
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(miniMessage.deserialize("<gold>=== Команды терминаторов ===</gold>"));
-        sender.sendMessage(miniMessage.deserialize("<yellow>/terminator add <игрок></yellow> <gray>- Добавить терминатора</gray>"));
-        sender.sendMessage(miniMessage.deserialize("<yellow>/terminator remove <игрок></yellow> <gray>- Удалить терминатора</gray>"));
-        sender.sendMessage(miniMessage.deserialize("<yellow>/terminator list</yellow> <gray>- Список терминаторов</gray>"));
-        sender.sendMessage(miniMessage.deserialize("<yellow>/terminator clear</yellow> <gray>- Очистить всех терминаторов</gray>"));
+        sender.sendMessage(Component.text("=== Команды терминаторов ===").color(NamedTextColor.GOLD));
+        sender.sendMessage(Component.text("/terminator add <игрок>").color(NamedTextColor.YELLOW).append(Component.text(" - Добавить терминатора").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/terminator remove <игрок>").color(NamedTextColor.YELLOW).append(Component.text(" - Удалить терминатора").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/terminator list").color(NamedTextColor.YELLOW).append(Component.text(" - Список терминаторов").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/terminator clear").color(NamedTextColor.YELLOW).append(Component.text(" - Очистить всех терминаторов").color(NamedTextColor.GRAY)));
     }
 
     @Override

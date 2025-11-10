@@ -5,7 +5,8 @@ import boo.bloodstone.managers.TerminatorManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,10 +32,7 @@ public class PlayerDeathListener implements Listener {
         Player killer = victim.getKiller();
         String killerName = killer != null ? killer.getName() : "Неизвестный";
         
-        MiniMessage miniMessage = MiniMessage.miniMessage();
-        Component message = miniMessage.deserialize(
-            "<gold><bold>" + killerName + "</bold></gold> <red>убил терминатора</red> <red><bold>" + victim.getName() + "</bold></red>"
-        );
+        Component message = Component.text(killerName).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD).append(Component.text(" убил терминатора ").color(NamedTextColor.RED)).append(Component.text(victim.getName()).color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
         Bukkit.broadcast(message);
 
         playSound("sounds.terminator-killed", "entity.ender_dragon.growl");
@@ -42,8 +40,7 @@ public class PlayerDeathListener implements Listener {
     }
 
     private void handleAllTerminatorsKilled() {
-        MiniMessage miniMessage = MiniMessage.miniMessage();
-        Component message = miniMessage.deserialize("<green><bold>Все терминаторы были убиты</bold></green>");
+        Component message = Component.text("Все терминаторы были убиты").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD);
         Bukkit.broadcast(message);
         playSound("sounds.all-killed", "ui.toast.challenge_complete");
     }

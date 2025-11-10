@@ -111,6 +111,6 @@ public class CompassManager {
     public void giveCompass(Player player) {
         ItemStack compass = createTrackingCompass();
         player.getInventory().addItem(compass);
-        player.sendMessage(miniMessage.deserialize("<green>Вы получили компас-трекер</green>"));
+        player.sendMessage(Component.text("Вы получили компас-трекер").color(net.kyori.adventure.text.format.NamedTextColor.GREEN));
     }
 }
